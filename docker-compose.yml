@@ -79,6 +79,30 @@ services:
       db:
         condition: service_healthy
 
+  # ==========================================
+  # Stats : Microservice Python FastAPI de statistiques
+  # ==========================================
+  stats-api:
+    build:
+      context: ./stats_api
+      dockerfile: Dockerfile
+    image: stats-api:1.0.0
+    container_name: clickfast-stats-api
+    ports:
+      - "${STATS_PORT:-8000}:8000"
+    environment:
+      DB_HOST: db
+      DB_PORT: ${DB_PORT:-5432}
+      DB_USER: ${DB_USER:-clickfast_user}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME:-clickfast_db}
+    restart: unless-stopped
+    networks:
+      - clickfast-network
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   clickfast_pgdata:
     name: clickfast_pgdata
