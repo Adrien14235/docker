@@ -1,0 +1,19 @@
+# Dependances & Build
+node_modules/
+dist/
+coverage/
+
+# Variables d'environnement & Secrets
+.env
+.env.local
+*.secret
+
+# Logs & Temporaires
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# System & OS
+.DS_Store
+Thumbs.db

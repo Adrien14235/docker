@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClickFast - Le jeu du clic rapide</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>ClickFast</h1>
+    </header>
+
+    <main class="game-card">
+      <div class="stats-panel">
+        <div class="stat-box">
+          <span class="stat-label">Temps restant</span>
+          <span id="timer" class="stat-value">5.0s</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">Score (clics)</span>
+          <span id="score" class="stat-value">0</span>
+        </div>
+      </div>
+
+      <div class="click-area">
+        <button id="click-btn" class="btn-primary" type="button">CLIQUEZ ICI !</button>
+      </div>
+
+      <div class="controls">
+        <button id="reset-btn" class="btn-secondary" type="button">Nouvelle partie</button>
+      </div>
+
+      <p id="game-message" class="message">Cliquez sur le bouton pour lancer le chrono !</p>
+      <section id="scoreboard-section" class="scoreboard-section hidden">
+        <h2>Tableau des scores</h2>
+        <div id="save-score-form" class="save-form">
+          <input type="text" id="player-name" placeholder="Votre pseudo" maxlength="20" />
+          <button id="save-score-btn" class="btn-save" type="button">Enregistrer mon score</button>
+        </div>
+        <div id="scores-list" class="scores-list">
+          <p class="loading">Chargement des scores...</p>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>Projet Fil Rouge DevOps &bull; ClickFast</p>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
