@@ -1,11 +1,21 @@
+require('dotenv').config();
 const { Pool } = require('pg');
+const requiredEnvVars = ['DB_HOST', 'DB_USER', 'DB_PASSWORD', 'DB_NAME'];
+const missingVars = requiredEnvVars.filter(varName => !process.env[varName] || process.env[varName].trim() === '');
+
+if (missingVars.length > 0) {
+  throw new Error(
+    `Erreur critique de configuration : Les variables d'environnement suivantes sont obligatoires mais manquantes : ${missingVars.join(', ')}.\n` +
+    `Veuillez vérifier votre fichier .env ou les variables injectées au conteneur.`
+  );
+}
 
 const pool = new Pool({
-  host: process.env.DB_HOST || 'localhost',
+  host: process.env.DB_HOST,
   port: parseInt(process.env.DB_PORT || '5432', 10),
-  user: process.env.DB_USER || 'clickfast_user',
-  password: process.env.DB_PASSWORD || 'clickfast_pass',
-  database: process.env.DB_NAME || 'clickfast_db',
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
   connectionTimeoutMillis: 3000,
   idleTimeoutMillis: 10000,
 });
