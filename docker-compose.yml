@@ -1,0 +1,89 @@
+services:
+  # ==========================================
+  # Frontend : Jeu ClickFast servi par Nginx
+  # ==========================================
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: clickfast-web:1.0.0
+    container_name: clickfast-web
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    networks:
+      - clickfast-network
+    depends_on:
+      - scores-api
+
+  # ==========================================
+  # Backend : API REST Node.js des scores
+  # ==========================================
+  scores-api:
+    build:
+      context: ./scores-api
+      dockerfile: Dockerfile
+    image: scores-api:1.0.0
+    container_name: clickfast-scores-api
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 3000
+      DB_HOST: db
+      DB_PORT: ${DB_PORT:-5432}
+      DB_USER: ${DB_USER:-clickfast_user}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME:-clickfast_db}
+    restart: unless-stopped
+    networks:
+      - clickfast-network
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ==========================================
+  # Database : Base relationnelle PostgreSQL
+  # ==========================================
+  db:
+    image: postgres:16-alpine
+    container_name: clickfast-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-clickfast_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-clickfast_db}
+    volumes:
+      - clickfast_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-clickfast_user} -d ${POSTGRES_DB:-clickfast_db}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 2s
+    restart: unless-stopped
+    networks:
+      - clickfast-network
+
+  # ==========================================
+  # Admin : Interface d'administration web Adminer
+  # ==========================================
+  adminer:
+    image: adminer:4
+    container_name: clickfast-adminer
+    ports:
+      - "${ADMINER_PORT:-8081}:8080"
+    restart: unless-stopped
+    networks:
+      - clickfast-network
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  clickfast_pgdata:
+    name: clickfast_pgdata
+
+networks:
+  clickfast-network:
+    name: clickfast-network
+    driver: bridge
