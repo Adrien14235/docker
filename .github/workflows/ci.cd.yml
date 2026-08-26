@@ -1,0 +1,25 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main", "develop", "feature/**" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Build the Docker image (Frontend Web)
+      run: docker build . --file Dockerfile --tag clickfast-web:$(date +%s)
+
+    - name: Build Scores API Docker image
+      run: docker build ./scores-api --file ./scores-api/Dockerfile --tag scores-api:$(date +%s)
+
+    - name: Build Stats API Docker image
+      run: docker build ./stats_api --file ./stats_api/Dockerfile --tag stats-api:$(date +%s)
