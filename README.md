@@ -104,3 +104,17 @@ J'ai automatisé le scénario complet de validation dans `scripts/test-e2e.ps1` 
 - Les stats renvoyées par `/stats` correspondent exactement aux entrées réelles en base.
 - Coupure brutale de PostgreSQL (`stop db`) en plein test : l'API et le service de stats répondent en HTTP 503 propre sans crasher. Dès la relance de la base, tous les services se reconnectent automatiquement.
 
+### Exercice III : CI/CD et Déploiement GitHub Pages
+- **GitHub Pages** : Déploiement des fichiers statiques du front (`index.html`, `style.css`, `script.js`) sur `https://adrien14235.github.io/docker/`.
+- **Pipeline CI/CD** : Configuration du workflow GitHub Actions dans `.github/workflows/ci.cd.yml` pour builder les images Docker à chaque push.
+
+### Exercice IV : Tests automatisés avec Jest & jsdom
+- **Tests unitaires en local** : Installation de Jest et de l'environnement `jsdom`.
+- **Validation du Getting Started** : `sum.js` et `sum.test.js`.
+- **Tests fonctionnels du jeu dans `script.test.js`** :
+  - Incrémentation du score lors des clics.
+  - Décompte effectif du timer de 5s.
+  - Blocage des clics après expiration du chrono.
+  - Réinitialisation complète du jeu et remise à zéro du score.
+- **Intégration CI** : Exécution automatique de `npm test` dans le workflow GitHub Actions avant l'étape de build des images Docker.
+

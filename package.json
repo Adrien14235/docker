@@ -1,0 +1,26 @@
+{
+  "name": "docker",
+  "version": "1.0.0",
+  "description": "Mini-jeu de rapidité où le but est de faire le plus grand nombre de clics en 5 secondes. \r Le front est servi par Nginx, les scores sont envoyés à une API Node.js/Express qui les enregistre dans une base PostgreSQL, et un service Python sous FastAPI permet de récupérer les statistiques globales.",
+  "main": "script.js",
+  "scripts": {
+    "test": "jest --env=jsdom"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Adrien14235/docker.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Adrien14235/docker/issues"
+  },
+  "homepage": "https://github.com/Adrien14235/docker#readme",
+  "devDependencies": {
+    "jest": "^30.4.2",
+    "jest-environment-jsdom": "^30.4.1",
+    "jsdom": "^29.1.1"
+  }
+}
