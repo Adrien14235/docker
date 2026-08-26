@@ -1,0 +1,22 @@
+# Git & Documentation
+.git
+.gitignore
+README.md
+
+# Fichiers de configuration & secrets
+.env*
+*.secret
+
+# Docker & CI
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+.github/
+
+# Dependances et temporaires
+node_modules/
+dist/
+coverage/
+*.log
+.DS_Store
+Thumbs.db
