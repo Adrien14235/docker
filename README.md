@@ -95,3 +95,12 @@ Ajout du microservice `stats_api/` en Python avec FastAPI.
 ### Étape 9 : Mesurer et optimiser
 - En mettant la copie des dépendances (`package*.json` et `requirements.txt`) avant le code source dans les Dockerfile, le build à chaud passe à environ 1 seconde car le cache Docker n'est pas invalidé à chaque modif de code.
 - Grâce aux images Alpine / Slim et au multi-stage build, les images restent légères (21 Mo pour Nginx, 56 Mo pour l'API Node).
+
+### Étape 10 : Le test qui rejoue toute la journée
+J'ai automatisé le scénario complet de validation dans `scripts/test-e2e.ps1` :
+- Démarrage de la stack complète uniquement depuis `docker-compose.prod.yml` et le `.env` : tous les conteneurs montent sans accroc.
+- Test d'enregistrement de score et validation des entrées invalides : un pseudo vide ou un score aberrant (>500) est bien bloqué en HTTP 400.
+- L'isolation du port PostgreSQL 5432 depuis l'hôte est confirmée.
+- Les stats renvoyées par `/stats` correspondent exactement aux entrées réelles en base.
+- Coupure brutale de PostgreSQL (`stop db`) en plein test : l'API et le service de stats répondent en HTTP 503 propre sans crasher. Dès la relance de la base, tous les services se reconnectent automatiquement.
+
