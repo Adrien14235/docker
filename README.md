@@ -150,6 +150,11 @@ J'ai automatisé le scénario complet de validation dans `scripts/test-e2e.ps1` 
 - **Détection des secrets (Secret Scanning)** : Intégration de `gitleaks/gitleaks-action@v2` avec `fetch-depth: 0` pour scanner l'intégralité de l'historique Git du dépôt et empêcher toute fuite de clé/mot de passe.
 - **Fail Fast & Sécurité** : Le job `build-and-push` attend désormais la réussite conjointe des tests et du scan de sécurité (`needs: [test, security-deps]`).
 
+#### Phase 5 : Scanner l'image avec Trivy
+- **Container Scanning** : Ajout du job `security-image` s'exécutant après la publication de l'image (`needs: build-and-push`) sur la branche `main`.
+- **Scan de vulnérabilités système** : Utilisation de `aquasecurity/trivy-action` pour analyser l'image publiée `${{ secrets.DOCKERHUB_USER }}/clickfast:${{ github.sha }}` et détecter d'éventuelles failles au niveau de l'OS / Nginx (Alpine).
+- **Seuil de blocage** : Configuration stricte sur `severity: 'HIGH,CRITICAL'` avec `exit-code: '1'` pour interrompre la pipeline si une faille critique non corrigée est détectée.
+
 ### Tableau de bord de suivi de la pipeline
 
 | Phase / Étape | Durée totale du run | Durée du job `test` | Taille de l'image publiée | Vulnérabilités (High/Crit) | Composants SBOM |
@@ -157,7 +162,9 @@ J'ai automatisé le scénario complet de validation dans `scripts/test-e2e.ps1` 
 | **Phase 2 (Référence - Sans cache)** | 52s | 34s | 21 Mo (Docker Hub) | - | - |
 | **Phase 3 (Avec cache `npm`)** | 36s | 19s | 21 Mo (Docker Hub) | - | - |
 | **Phase 4 (SCA & Gitleaks)** | 42s | 19s | 21 Mo (Docker Hub) | 0 vulnérabilité | - |
-| **Gain / Écart mesuré** | **-10s (vs Phase 2)** | **-15s (-44.1%)** | Stable (0 Mo) | Conforme (0 fuite) | - |
+| **Phase 5 (Scan Image Trivy)** | 58s | 19s | 21 Mo (Docker Hub) | 0 vulnérabilité (0 HIGH / 0 CRIT) | - |
+| **Gain / Écart mesuré** | **+6s (vs Phase 2, avec 3 scans)** | **-15s (-44.1%)** | Stable (0 Mo) | Conforme (0 alerte) | - |
+
 
 
 

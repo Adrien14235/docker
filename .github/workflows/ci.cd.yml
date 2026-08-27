@@ -94,3 +94,21 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USER || secrets.DOCKERHUB_USERNAME }}/clickfast:${{ github.sha }}
+
+  security-image:
+    name: Container Security Scan (Trivy)
+    needs: build-and-push
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scan published Docker image with Trivy
+        uses: aquasecurity/trivy-action@master
+        env:
+          TRIVY_USERNAME: ${{ secrets.DOCKERHUB_USER || secrets.DOCKERHUB_USERNAME }}
+          TRIVY_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
+        with:
+          image-ref: ${{ secrets.DOCKERHUB_USER || secrets.DOCKERHUB_USERNAME }}/clickfast:${{ github.sha }}
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          severity: 'HIGH,CRITICAL'
