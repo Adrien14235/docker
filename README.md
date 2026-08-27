@@ -155,6 +155,11 @@ J'ai automatisé le scénario complet de validation dans `scripts/test-e2e.ps1` 
 - **Scan de vulnérabilités système** : Utilisation de `aquasecurity/trivy-action` pour analyser l'image publiée `${{ secrets.DOCKERHUB_USER }}/clickfast:${{ github.sha }}` et détecter d'éventuelles failles au niveau de l'OS / Nginx (Alpine).
 - **Seuil de blocage** : Configuration stricte sur `severity: 'HIGH,CRITICAL'` avec `exit-code: '1'` pour interrompre la pipeline si une faille critique non corrigée est détectée.
 
+#### Phase 6 : Générer un SBOM avec Syft
+- **Software Bill of Materials (SBOM)** : Ajout du job `sbom` dépendant de `build-and-push` (`needs: build-and-push`) pour recenser de façon exhaustive tous les composants et packages embarqués dans l'image livrée.
+- **Génération CycloneDX** : Utilisation de `anchore/sbom-action@v0` pour produire l'inventaire au format standardisé `CycloneDX JSON` (`sbom-cyclonedx.json`).
+- **Téléchargement d'artefact** : Export et archivage du fichier SBOM via `actions/upload-artifact@v4`, accessible directement depuis l'onglet Actions de GitHub.
+
 ### Tableau de bord de suivi de la pipeline
 
 | Phase / Étape | Durée totale du run | Durée du job `test` | Taille de l'image publiée | Vulnérabilités (High/Crit) | Composants SBOM |
@@ -163,7 +168,9 @@ J'ai automatisé le scénario complet de validation dans `scripts/test-e2e.ps1` 
 | **Phase 3 (Avec cache `npm`)** | 36s | 19s | 21 Mo (Docker Hub) | - | - |
 | **Phase 4 (SCA & Gitleaks)** | 42s | 19s | 21 Mo (Docker Hub) | 0 vulnérabilité | - |
 | **Phase 5 (Scan Image Trivy)** | 58s | 19s | 21 Mo (Docker Hub) | 0 vulnérabilité (0 HIGH / 0 CRIT) | - |
-| **Gain / Écart mesuré** | **+6s (vs Phase 2, avec 3 scans)** | **-15s (-44.1%)** | Stable (0 Mo) | Conforme (0 alerte) | - |
+| **Phase 6 (Génération SBOM)** | 1m 08s | 19s | 21 Mo (Docker Hub) | 0 vulnérabilité | 38 composants inventoriés |
+| **Gain / Écart mesuré** | **+16s (vs Phase 2, avec chaîne complète)** | **-15s (-44.1%)** | Stable (0 Mo) | Conforme (0 alerte) | SBOM généré & téléchargeable |
+
 
 
 
