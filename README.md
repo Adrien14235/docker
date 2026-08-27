@@ -178,7 +178,12 @@ J'ai automatisé le scénario complet de validation dans `scripts/test-e2e.ps1` 
   - `verify.yml` : déclenché sur chaque Pull Request (`on: pull_request`) pour lancer lint, tests unitaires et scans de sécurité (SCA, Secrets). Aucune publication d'image n'est effectuée sur du code en chantier.
   - `release.yml` : déclenché uniquement lors d'un `push` sur la branche `main` (`on: push: branches: [main]`) pour exécuter la suite complète jusqu'au build, push de l'image (protégé par l'environnement `production`), scan Trivy et génération du SBOM.
 
-
+#### Phase 10 : Casser main, et savoir s'en remettre
+- **Simulation d'incident** : Altération volontaire d'une assertion de test Jest sur une branche dédiée pour provoquer un échec.
+- **Détection pré-fusion** : Le workflow `verify.yml` a échoué sur la Pull Request, démontrant l'efficacité du filet de sécurité en amont.
+- **Impact sur main** : La fusion a provoqué l'arrêt immédiat de `release.yml` sur le job `test`, bloquant la publication Docker Hub et préservant l'intégrité de la production.
+- **Sécurisation de la branche main** : Mise en place d'une règle de protection de branche (*Branch protection rule*) imposant le passage au vert du check `verify.yml` avant toute fusion future.
+- **Rétablissement** : Correction du test, validation de la pipeline et retour au vert de l'ensemble de la chaîne CI/CD.
 
 ### Tableau de bord de suivi de la pipeline
 
@@ -190,7 +195,9 @@ J'ai automatisé le scénario complet de validation dans `scripts/test-e2e.ps1` 
 | **Phase 5 (Scan Image Trivy)** | 58s | 19s | 21 Mo (Docker Hub) | 0 vulnérabilité (0 HIGH / 0 CRIT) | - |
 | **Phase 6 (Génération SBOM)** | 1m 08s | 19s | 21 Mo (Docker Hub) | 0 vulnérabilité | 38 composants inventoriés |
 | **Phase 7 (Step Summary)** | 1m 12s | 19s | 21 Mo (Docker Hub) | 0 vulnérabilité | Rapport global généré |
-| **Gain / Écart mesuré** | **+20s (vs Phase 2, avec 4 scanners + résumé)** | **-15s (-44.1%)** | Stable (0 Mo) | Conforme (0 alerte) | Visibilité instantanée ($GITHUB_STEP_SUMMARY) |
+| **Phase 10 (Rétablissement / MTTR)** | 38s | 19s | 21 Mo (Docker Hub) | 0 vulnérabilité | **MTTR : ~4 min** |
+| **Gain global mesuré** | **Pipeline optimisée & sécurisée** | **-15s (-44.1%)** | Stable (0 Mo) | Conforme (0 alerte) | CI/CD complète & protégée |
+
 
 
 
