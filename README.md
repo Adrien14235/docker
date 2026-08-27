@@ -143,13 +143,21 @@ J'ai automatisé le scénario complet de validation dans `scripts/test-e2e.ps1` 
 - **Optimisation du cache npm** : Configuration de `cache: 'npm'` sur `actions/setup-node@v4` pour réutiliser le cache des dépendances entre les runs et réduire drastiquement le temps d'exécution de `npm ci`.
 - **Tableau de bord de suivi** : Mise en place du tableau de métriques récapitulatif permettant de mesurer l'impact réel des optimisations sur la durée des runs et la taille des artefacts.
 
+### Palier 2 : La sécurité entre dans la pipeline
+
+#### Phase 4 : Brancher npm audit et gitleaks
+- **Analyse des dépendances (SCA)** : Intégration de `npm audit --audit-level=high` dans un job dédié `security-deps` s'exécutant en parallèle de `lint` et `test`. Il bloque la pipeline uniquement en cas de vulnérabilités critiques ou élevées (`high`, `critical`).
+- **Détection des secrets (Secret Scanning)** : Intégration de `gitleaks/gitleaks-action@v2` avec `fetch-depth: 0` pour scanner l'intégralité de l'historique Git du dépôt et empêcher toute fuite de clé/mot de passe.
+- **Fail Fast & Sécurité** : Le job `build-and-push` attend désormais la réussite conjointe des tests et du scan de sécurité (`needs: [test, security-deps]`).
+
 ### Tableau de bord de suivi de la pipeline
 
 | Phase / Étape | Durée totale du run | Durée du job `test` | Taille de l'image publiée | Vulnérabilités (High/Crit) | Composants SBOM |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Phase 2 (Référence - Sans cache)** | 52s | 34s | 21 Mo (Docker Hub) | - | - |
 | **Phase 3 (Avec cache `npm`)** | 36s | 19s | 21 Mo (Docker Hub) | - | - |
-| **Gain / Écart mesuré** | **-16s (-30.7%)** | **-15s (-44.1%)** | Stable (0 Mo) | - | - |
+| **Phase 4 (SCA & Gitleaks)** | 42s | 19s | 21 Mo (Docker Hub) | 0 vulnérabilité | - |
+| **Gain / Écart mesuré** | **-10s (vs Phase 2)** | **-15s (-44.1%)** | Stable (0 Mo) | Conforme (0 fuite) | - |
 
 
 
