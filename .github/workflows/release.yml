@@ -1,10 +1,8 @@
-name: CI Pipeline
+name: Release
 
 on:
   push:
-    branches: [ "main", "develop", "j2", "feature/**" ]
-  pull_request:
-    branches: [ "main", "develop", "j2" ]
+    branches: [ "main" ]
 
 jobs:
   lint:
@@ -47,7 +45,6 @@ jobs:
 
   build-and-push:
     needs: [test, security-deps]
-    if: github.ref == 'refs/heads/main'
     environment: production
     runs-on: ubuntu-latest
     steps:
@@ -66,7 +63,6 @@ jobs:
 
   security-image:
     needs: build-and-push
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: aquasecurity/trivy-action@master
@@ -82,7 +78,6 @@ jobs:
 
   sbom:
     needs: build-and-push
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: docker/login-action@v3

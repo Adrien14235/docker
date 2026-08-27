@@ -1,6 +1,7 @@
 # ClickFast
 
-![CI Pipeline](https://github.com/Adrien14235/docker/actions/workflows/ci.cd.yml/badge.svg)
+[![Verify](https://github.com/Adrien14235/docker/actions/workflows/verify.yml/badge.svg)](https://github.com/Adrien14235/docker/actions/workflows/verify.yml)
+[![Release](https://github.com/Adrien14235/docker/actions/workflows/release.yml/badge.svg)](https://github.com/Adrien14235/docker/actions/workflows/release.yml)
 
 **Auteur** : Adrien Antunes
 
@@ -171,6 +172,12 @@ J'ai automatisé le scénario complet de validation dans `scripts/test-e2e.ps1` 
 - **Protection par GitHub Environments** : Création de l'environnement `production` avec un reviewer requis dans les paramètres du dépôt.
 - **Association au job de publication** : Rattachement du job `build-and-push` à `environment: production`.
 - **Bascule en Continuous Delivery** : Le workflow bloque automatiquement avant la publication sur Docker Hub et attend une approbation manuelle ("Review deployments" -> "Approve and deploy") pour exécuter le push.
+
+#### Phase 9 : Séparer vérification et publication
+- **Découplage des workflows** : Remplacement du workflow unique par deux fichiers distincts dans `.github/workflows/` :
+  - `verify.yml` : déclenché sur chaque Pull Request (`on: pull_request`) pour lancer lint, tests unitaires et scans de sécurité (SCA, Secrets). Aucune publication d'image n'est effectuée sur du code en chantier.
+  - `release.yml` : déclenché uniquement lors d'un `push` sur la branche `main` (`on: push: branches: [main]`) pour exécuter la suite complète jusqu'au build, push de l'image (protégé par l'environnement `production`), scan Trivy et génération du SBOM.
+
 
 
 ### Tableau de bord de suivi de la pipeline
