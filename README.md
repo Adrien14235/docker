@@ -139,4 +139,17 @@ J'ai automatisé le scénario complet de validation dans `scripts/test-e2e.ps1` 
 - **Authentification sécurisée** : Connexion à Docker Hub via l'action officielle `docker/login-action@v3` avec les identifiants stockés dans les secrets GitHub (`DOCKERHUB_USER` et `DOCKERHUB_TOKEN`).
 - **Artefact immuable et traçable** : Build et push via `docker/build-push-action@v6` avec le tag `${{ github.sha }}`. Chaque commit sur `main` produit un artefact unique, immuable et directement traçable jusqu'au code source.
 
+#### Phase 3 : Mesurer avant d'optimiser
+- **Optimisation du cache npm** : Configuration de `cache: 'npm'` sur `actions/setup-node@v4` pour réutiliser le cache des dépendances entre les runs et réduire drastiquement le temps d'exécution de `npm ci`.
+- **Tableau de bord de suivi** : Mise en place du tableau de métriques récapitulatif permettant de mesurer l'impact réel des optimisations sur la durée des runs et la taille des artefacts.
+
+### Tableau de bord de suivi de la pipeline
+
+| Phase / Étape | Durée totale du run | Durée du job `test` | Taille de l'image publiée | Vulnérabilités (High/Crit) | Composants SBOM |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Phase 2 (Référence - Sans cache)** | 52s | 34s | 21 Mo (Docker Hub) | - | - |
+| **Phase 3 (Avec cache `npm`)** | 36s | 19s | 21 Mo (Docker Hub) | - | - |
+| **Gain / Écart mesuré** | **-16s (-30.7%)** | **-15s (-44.1%)** | Stable (0 Mo) | - | - |
+
+
 
