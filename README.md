@@ -134,3 +134,9 @@ J'ai automatisé le scénario complet de validation dans `scripts/test-e2e.ps1` 
 - **Déclencheurs** : Pipeline configurée pour se déclencher sur chaque `push` et chaque `pull_request`.
 - **Validation locale** : `npm run lint` et `npm test` s'exécutent avec succès.
 
+#### Phase 2 : Publier une image taguée au SHA du commit
+- **Job de publication `build-and-push`** : Ajout du job dépendant de `test` (`needs: test`), exécuté uniquement sur la branche `main` (`if: github.ref == 'refs/heads/main'`) pour ne jamais publier de code en chantier issu d'une pull request.
+- **Authentification sécurisée** : Connexion à Docker Hub via l'action officielle `docker/login-action@v3` avec les identifiants stockés dans les secrets GitHub (`DOCKERHUB_USER` et `DOCKERHUB_TOKEN`).
+- **Artefact immuable et traçable** : Build et push via `docker/build-push-action@v6` avec le tag `${{ github.sha }}`. Chaque commit sur `main` produit un artefact unique, immuable et directement traçable jusqu'au code source.
+
+
