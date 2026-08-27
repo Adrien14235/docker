@@ -1,5 +1,9 @@
 # ClickFast
 
+![CI Pipeline](https://github.com/Adrien14235/docker/actions/workflows/ci.cd.yml/badge.svg)
+
+**Auteur** : Adrien Antunes
+
 Mini-jeu de rapidité où le but est de faire le plus grand nombre de clics en 5 secondes. 
 Le front est servi par Nginx, les scores sont envoyés à une API Node.js/Express qui les enregistre dans une base PostgreSQL, et un service Python sous FastAPI permet de récupérer les statistiques globales.
 
@@ -117,4 +121,16 @@ J'ai automatisé le scénario complet de validation dans `scripts/test-e2e.ps1` 
   - Blocage des clics après expiration du chrono.
   - Réinitialisation complète du jeu et remise à zéro du score.
 - **Intégration CI** : Exécution automatique de `npm test` dans le workflow GitHub Actions avant l'étape de build des images Docker.
+
+---
+
+## Paliers & Phases - Automatisation CI/CD (Jour 2)
+
+### Palier 1 : Reprendre la main sur la pipeline
+
+#### Phase 1 : Écrire ses propres stages, lint puis test
+- **Linting avec ESLint** : Ajout d'ESLint en devDependencies, création du fichier de configuration moderne `eslint.config.js` et ajout du script `"lint": "eslint ."` dans `package.json`.
+- **Ordonnancement Fail-Fast** : Refonte de `.github/workflows/ci.cd.yml` avec deux jobs distincts (`lint` puis `test`). Le job `test` dépend explicitement du succès de `lint` via `needs: lint`. Si une erreur de lint survient, les tests ne sont pas exécutés inutilement.
+- **Déclencheurs** : Pipeline configurée pour se déclencher sur chaque `push` et chaque `pull_request`.
+- **Validation locale** : `npm run lint` et `npm test` s'exécutent avec succès.
 

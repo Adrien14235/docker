@@ -4,6 +4,7 @@
   "description": "Mini-jeu de rapidité où le but est de faire le plus grand nombre de clics en 5 secondes. \r Le front est servi par Nginx, les scores sont envoyés à une API Node.js/Express qui les enregistre dans une base PostgreSQL, et un service Python sous FastAPI permet de récupérer les statistiques globales.",
   "main": "script.js",
   "scripts": {
+    "lint": "eslint .",
     "test": "jest --env=jsdom"
   },
   "repository": {
@@ -19,6 +20,7 @@
   },
   "homepage": "https://github.com/Adrien14235/docker#readme",
   "devDependencies": {
+    "eslint": "^10.9.1",
     "jest": "^30.4.2",
     "jest-environment-jsdom": "^30.4.1",
     "jsdom": "^29.1.1"

@@ -1,16 +1,9 @@
-﻿const {
-  handleClick,
+const {
   resetGame,
-  startGame,
   endGame,
   handleGameButton,
   handleResetButton,
-  initGame,
-  getScore,
-  setScore,
-  getIsPlaying,
-  getIsGameOver,
-  getTimeLeft
+  getScore
 } = require("./script");
 
 describe("Tests unitaires du jeu ClickFast", () => {

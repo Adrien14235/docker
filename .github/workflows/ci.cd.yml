@@ -1,4 +1,4 @@
-﻿name: CI/CD Pipeline
+name: CI Pipeline
 
 on:
   push:
@@ -7,11 +7,32 @@ on:
     branches: [ "main", "develop", "j2" ]
 
 jobs:
-  test:
-    name: Run Unit Tests
+  lint:
+    name: Lint Code (ESLint)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+  test:
+    name: Run Unit Tests (Jest)
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -24,19 +45,3 @@ jobs:
 
       - name: Run Jest tests
         run: npm test
-
-  build:
-    name: Build Docker Images
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Build the Docker image (Frontend Web)
-        run: docker build . --file Dockerfile --tag clickfast-web:$(date +%s)
-
-      - name: Build Scores API Docker image
-        run: docker build ./scores-api --file ./scores-api/Dockerfile --tag scores-api:$(date +%s)
-
-      - name: Build Stats API Docker image
-        run: docker build ./stats_api --file ./stats_api/Dockerfile --tag stats-api:$(date +%s)
