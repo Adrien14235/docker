@@ -160,6 +160,11 @@ J'ai automatisé le scénario complet de validation dans `scripts/test-e2e.ps1` 
 - **Génération CycloneDX** : Utilisation de `anchore/sbom-action@v0` pour produire l'inventaire au format standardisé `CycloneDX JSON` (`sbom-cyclonedx.json`).
 - **Téléchargement d'artefact** : Export et archivage du fichier SBOM via `actions/upload-artifact@v4`, accessible directement depuis l'onglet Actions de GitHub.
 
+#### Phase 7 : Centraliser l'état de sécurité dans un résumé
+- **Rapport agrégé `$GITHUB_STEP_SUMMARY`** : Ajout du job final `security-summary` dépendant de l'ensemble des contrôles de sécurité (`needs: [security-deps, security-image, sbom]`) avec la condition `if: always()`.
+- **Visibilité immédiate** : Génération d'un rapport Markdown synthétique directement visible dans l'onglet Actions, résumant l'état des 4 scanners (npm audit, Gitleaks, Trivy, Syft) sans avoir à ouvrir les logs.
+- **Résilience** : Affiche correctement les états même en cas de job ignoré (PR) ou échoué.
+
 ### Tableau de bord de suivi de la pipeline
 
 | Phase / Étape | Durée totale du run | Durée du job `test` | Taille de l'image publiée | Vulnérabilités (High/Crit) | Composants SBOM |
@@ -169,7 +174,9 @@ J'ai automatisé le scénario complet de validation dans `scripts/test-e2e.ps1` 
 | **Phase 4 (SCA & Gitleaks)** | 42s | 19s | 21 Mo (Docker Hub) | 0 vulnérabilité | - |
 | **Phase 5 (Scan Image Trivy)** | 58s | 19s | 21 Mo (Docker Hub) | 0 vulnérabilité (0 HIGH / 0 CRIT) | - |
 | **Phase 6 (Génération SBOM)** | 1m 08s | 19s | 21 Mo (Docker Hub) | 0 vulnérabilité | 38 composants inventoriés |
-| **Gain / Écart mesuré** | **+16s (vs Phase 2, avec chaîne complète)** | **-15s (-44.1%)** | Stable (0 Mo) | Conforme (0 alerte) | SBOM généré & téléchargeable |
+| **Phase 7 (Step Summary)** | 1m 12s | 19s | 21 Mo (Docker Hub) | 0 vulnérabilité | Rapport global généré |
+| **Gain / Écart mesuré** | **+20s (vs Phase 2, avec 4 scanners + résumé)** | **-15s (-44.1%)** | Stable (0 Mo) | Conforme (0 alerte) | Visibilité instantanée ($GITHUB_STEP_SUMMARY) |
+
 
 
 

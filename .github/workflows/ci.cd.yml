@@ -8,87 +8,55 @@ on:
 
 jobs:
   lint:
-    name: Lint Code (ESLint)
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run ESLint
-        run: npm run lint
+      - run: npm ci
+      - run: npm run lint
 
   test:
-    name: Run Unit Tests (Jest)
     needs: lint
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run Jest tests
-        run: npm test
+      - run: npm ci
+      - run: npm test
 
   security-deps:
-    name: Security Scans (SCA & Secrets)
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code with full history
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
-
-      - name: Scan dependencies vulnerabilities (SCA)
-        run: npm audit --audit-level=high
-
-      - name: Scan repository for leaked secrets (Gitleaks)
-        uses: gitleaks/gitleaks-action@v2
+      - run: npm audit --audit-level=high
+      - uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-and-push:
-    name: Build and Push Docker Image
     needs: [test, security-deps]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USER || secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build and Push ClickFast Image
-        uses: docker/build-push-action@v6
+      - uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile
@@ -96,13 +64,11 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USER || secrets.DOCKERHUB_USERNAME }}/clickfast:${{ github.sha }}
 
   security-image:
-    name: Container Security Scan (Trivy)
     needs: build-and-push
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - name: Scan published Docker image with Trivy
-        uses: aquasecurity/trivy-action@master
+      - uses: aquasecurity/trivy-action@master
         env:
           TRIVY_USERNAME: ${{ secrets.DOCKERHUB_USER || secrets.DOCKERHUB_USERNAME }}
           TRIVY_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -114,26 +80,34 @@ jobs:
           severity: 'HIGH,CRITICAL'
 
   sbom:
-    name: Generate SBOM (Syft)
     needs: build-and-push
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
+      - uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USER || secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Generate SBOM with Syft (CycloneDX)
-        uses: anchore/sbom-action@v0
+      - uses: anchore/sbom-action@v0
         with:
           image: ${{ secrets.DOCKERHUB_USER || secrets.DOCKERHUB_USERNAME }}/clickfast:${{ github.sha }}
           format: cyclonedx-json
           output-file: sbom-cyclonedx.json
-
-      - name: Upload SBOM Artifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: sbom-cyclonedx
           path: sbom-cyclonedx.json
+
+  security-summary:
+    needs: [security-deps, security-image, sbom]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resume securite
+        run: |
+          echo "## Resume securite" >> $GITHUB_STEP_SUMMARY
+          echo "| Scan | Statut |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+          echo "| npm audit & gitleaks | ${{ needs.security-deps.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Trivy (image) | ${{ needs.security-image.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| SBOM (Syft) | ${{ needs.sbom.result }} |" >> $GITHUB_STEP_SUMMARY
