@@ -165,6 +165,14 @@ J'ai automatisé le scénario complet de validation dans `scripts/test-e2e.ps1` 
 - **Visibilité immédiate** : Génération d'un rapport Markdown synthétique directement visible dans l'onglet Actions, résumant l'état des 4 scanners (npm audit, Gitleaks, Trivy, Syft) sans avoir à ouvrir les logs.
 - **Résilience** : Affiche correctement les états même en cas de job ignoré (PR) ou échoué.
 
+### Palier 3 : Le geste qui compte, et savoir l'arrêter
+
+#### Phase 8 : Faire valider la publication par un humain
+- **Protection par GitHub Environments** : Création de l'environnement `production` avec un reviewer requis dans les paramètres du dépôt.
+- **Association au job de publication** : Rattachement du job `build-and-push` à `environment: production`.
+- **Bascule en Continuous Delivery** : Le workflow bloque automatiquement avant la publication sur Docker Hub et attend une approbation manuelle ("Review deployments" -> "Approve and deploy") pour exécuter le push.
+
+
 ### Tableau de bord de suivi de la pipeline
 
 | Phase / Étape | Durée totale du run | Durée du job `test` | Taille de l'image publiée | Vulnérabilités (High/Crit) | Composants SBOM |
